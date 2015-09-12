@@ -38,23 +38,24 @@ function get_account_list($auth_user)
 
 function store_account_settings($auth_user, $settings)
 {
+    echo "store_account_settings()<br />";
     if (!filled_out($settings)) {
         echo "<p>All fields must be filled, Try again.</p>";
         return false;
     } else {
         if ($settings['account'] > 0) {
-            $query = "UPDATE accounts SET server = '" . $settings[server] . "',
-                port = '" . $settings[port] . "', type='" . $settings[type] . "',
-                remoteuser = '" . $settings[remoteuser] . "',
-                remotepassword = '" . $settings[remotepassword] . "'
-                WHERE accountid = '" . $settings[account] . "'
+            $query = "UPDATE accounts SET server = '" . $settings['server'] . "',
+                port = '" . $settings['port'] . "', type='" . $settings['type'] . "',
+                remoteuser = '" . $settings['remoteuser'] . "',
+                remotepassword = '" . $settings['remotepassword'] . "'
+                WHERE accountid = '" . $settings['account'] . "'
                 AND username='" . $auth_user . "'";
         } else {
             $query = "INSERT INTO accounts VALUES (
                 '" . $auth_user . "',
-                '" . $settings[server] . "', '" . $settings[port] . "',
-                '" . $settings[type] . "', '" . $settings[remoteuser] . "',
-                '" . $settings[remotepassword] . "',
+                '" . $settings['server'] . "', '" . $settings['port'] . "',
+                '" . $settings['type'] . "', '" . $settings['remoteuser'] . "',
+                '" . $settings['remotepassword'] . "',
                 NULL)";
         }
         if ($conn = db_connect()) {
@@ -69,6 +70,19 @@ function store_account_settings($auth_user, $settings)
             return false;
         }
     }
+}
+
+function get_account_settings($auth_user, $accountid) {
+    $conn = db_connect();
+    $query = "SELECT * FROM accounts
+                WHERE accountid = '".$accountid."'
+                AND username = '".$auth_user."'";
+    $result = $conn->query($query);
+    if ($result) {
+        $result->fetch_array();
+        return $result;
+    }
+    return false;
 }
 
 function delete_account($auth_user, $accountid)
@@ -111,12 +125,12 @@ function open_mailbox($auth_user, $accountid)
     if (!sizeof($settings)) {
         return 0;
     }
-    $mailbox = '{' . $settings[server];
-    if ($settings[type] == 'POP3') {
+    $mailbox = '{' . $settings['server'];
+    if ($settings['type'] == 'POP3') {
         $mailbox .= '/pop3';
     }
-    $mailbox .= ':' . $settings[port] . '}INBOX';
-    @$imap = imap_open($mailbox, $settings['remoteuser'], $settings['remotepassword']);
+    $mailbox .= ':' . $settings['port'] . '}INBOX';
+    $imap = imap_open($mailbox, $settings['remoteuser'], $settings['remotepassword']);
     return $imap;
 }
 
@@ -174,7 +188,7 @@ function send_message($to, $cc, $subject, $message)
     }
 
     $query = "SELECT address FROM users WHERE
-              username='" . $_SESSION['auth_user'] . "'";
+                username ='" . $_SESSION['auth_user'] . "'";
 
     $result = $conn->query($query);
     if (!$result) {
@@ -195,4 +209,6 @@ function send_message($to, $cc, $subject, $message)
     }
 }
 
-?>
+function add_quoting($hz) {
+    return $hz;
+}

@@ -13,7 +13,7 @@ function login($username, $passwd) {
     $conn = db_connect();
     $query = "SELECT * FROM users
               WHERE username='".$username."'
-              and password = '".$passwd."'";
+              AND password = '".$passwd."'";
     $result = $conn->query($query);
     if (!$result) {
         return false;

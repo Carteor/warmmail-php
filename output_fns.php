@@ -5,7 +5,7 @@ function display_account_setup($auth_user)
 //add new account
     display_account_form($auth_user);
     $list = get_accounts($auth_user);
-    $accounts = sizeof($list);
+//    $accounts = sizeof($list);
 //display all accounts
     foreach ($list as $key => $account) {
         display_account_form($auth_user,
@@ -22,20 +22,20 @@ function display_account_form($auth_user, $accountid = '', $server = '',
                               $remoteuser = '', $remotepassword = '', $type = '', $port = '')
 {
     ?>
-    <form action="index.php" method="post">
+    <form action="index.php?action=store-settings" method="post">
         <table>
             <tr>
                 <td>Server name:</td>
-                <td><input type="text" name="server" value="<?php echo $server;?>"/></td>
+                <td><input type="text" name="server" value="<?php echo $server;?>" title="Server name"/></td>
             </tr>
             <tr>
                 <td>Port number:</td>
-                <td><input type="text" name="port" value="<?php echo $port;?>"/></td>
+                <td><input type="text" name="port" value="<?php echo $port;?>" title="Port number"/></td>
             </tr>
             <tr>
                 <td>Server type:</td>
                 <td>
-                    <select name="type">
+                    <select name="type" title="Server type">
                         <option value="imap">IMAP</option>
                         <option value="pop3">POP3</option>
                     </select>
@@ -43,11 +43,11 @@ function display_account_form($auth_user, $accountid = '', $server = '',
             </tr>
             <tr>
                 <td>Username:</td>
-                <td><input type="text" name="remoteuser" value="<?php echo $remoteuser;?>"/></td>
+                <td><input type="text" name="remoteuser" value="<?php echo $remoteuser;?>" title="Username"/></td>
             </tr>
             <tr>
                 <td>Password:</td>
-                <td><input type="password" name="remotepassword" value="<?php echo $remotepassword;?>"/></td>
+                <td><input type="password" name="remotepassword" value="<?php echo $remotepassword;?>" title="Password"/></td>
             </tr>
         </table>
         <input type="submit" value="Save Changes"/>
@@ -91,17 +91,10 @@ function display_toolbar($buttons)
 
 function display_account_select($auth_user, $selected_account)
 {
+    echo "display_account_select()<br />";
     ?>
-    <select
-        onchange="window.location=this.options[selectedIndex].valuename=account">
-        <option
-            value="index.php?action=select-account&account=4" selected>
-            thickbook.com
-        </option>
-        <option
-            value="index.php?action=select-account&account=3">
-            localhost
-        </option>
+    <select>
+
     </select>
     <?php
 }
@@ -109,6 +102,7 @@ function display_account_select($auth_user, $selected_account)
 function display_list($auth_user, $accountid)
 {
     global $table_width;
+    echo $accountid;
     if (!$accountid) {
         echo "<p style=\"padding-bottom: 100px\">Mailbox is not selected.</p>";
     } else {
@@ -143,17 +137,18 @@ function display_list($auth_user, $accountid)
 
 function display_login_form($action)
 {
+    echo $action;
     ?>
     <h2>Log in</h2>
     <form action="index.php" method="post">
         <table>
             <tr>
                 <td>Username:</td>
-                <td><input type="text" name="username"/></td>
+                <td><input type="text" name="username" title="Username"/></td>
             </tr>
             <tr>
                 <td>Password:</td>
-                <td><input type="password" name="password"/></td>
+                <td><input type="password" name="password" title="Password"/></td>
             </tr>
         </table>
         <input type="submit" value="Log In"/>
@@ -165,4 +160,27 @@ function display_button($action) {
     echo "<a href=\"index.php?action=".$action."\">".$action."</a><br />";
 }
 
+function display_message($auth_user, $selected_account, $messageid,
+                         $fullheaders) {
+    echo "User: ".$auth_user."<br />".
+        "Selected account: ".$selected_account . "<br />" .
+        "Messageid: " . $messageid . "<br />" .
+        "Full header: " . $fullheaders . "<br />";
+}
+
+function display_new_message_form($auth_user, $to, $cc,
+                                  $subject, $body) {
 ?>
+<form action="index.php?action=send-message" method="post">
+    To address: <input type="text" name="to" title="To/Address"
+                    value="<?php echo $to; ?>"/> <br />
+    Address/CC: <input type="text" name="cc" title="CC"
+                    value="<?php echo $cc; ?>"/> <br />
+    Subject: <input type="text" name="subject" title="Subject"
+        value="<?php echo $subject; ?>"/> <br />
+    <textarea rows="4" cols="50" name="message" title="Message"></textarea> <br />
+    <input type="submit" value="Send message" row="3"/> <br />
+</form>
+
+<?php
+}

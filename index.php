@@ -46,7 +46,7 @@ if ($action == 'log-out') {
     $_SESSION = array();
 }
 
-switch ($action) {
+switch (@ $action) {
     case 'delete-account':
         delete_account($_SESSION['auth_user'], $_POST);
         break;
@@ -68,7 +68,7 @@ if (check_auth_user()) {
     $buttons[4] = 'log-out';
 }
 //2
-if ($action) {
+if ( @ $action) {
     @ do_html_header($_SESSION['auth_user'],
         "Warm mail - " . format_action($action),
         $_SESSION['selected_account']);
@@ -83,11 +83,11 @@ echo $status;
 
 if (!check_auth_user()) {
     echo "You must log in";
-    if (($action) && ($action != 'log-out')) {
+    if (@( $action) && ($action != 'log-out')) {
         echo " and then go to " . format_action($action);
     }
     echo ".</p>";
-    display_login_form($action);
+    display_login_form(@ $action);
 } else {
     switch ($action) {
         case 'store-settings':
@@ -132,7 +132,7 @@ if (!check_auth_user()) {
                 }
                 $cc = $header->ccaddress;
                 $subject = "Re: " . $header->subject;
-                $body = add_quoting($stripslashes(imap_body($imap, $messageid)));
+                $body = add_quoting(stripslashes(imap_body($imap, $messageid)));
                 imap_close($imap);
                 display_new_message_form($_SESSION['auth_user'],
                     $to, $cc, $subject, $body);
@@ -152,7 +152,7 @@ if (!check_auth_user()) {
                 }
 
                 $subject = "Re: " . $header->subject;
-                $body = add_quoting($stripslashes($imap_body($imap, $messageid)));
+                $body = add_quoting(stripslashes($imap_body($imap, $messageid)));
                 imap_close($imap);
 
                 display_new_message_form($_SESSION['auth_user'],
