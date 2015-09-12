@@ -1,31 +1,31 @@
 <?php
 
-include ('include_fns.php');
+include('include_fns.php');
 session_start();
 
-$username = $_POST['username'];
-$passwd = $_POST['passwd'];
-$action = $_POST['action'];
-$account = $_POST['account'];
-$messageid = $_POST['messageid'];
+@ $username = $_POST['username'];
+@ $passwd = $_POST['passwd'];
+@ $action = $_POST['action'];
+@ $account = $_POST['account'];
+@ $messageid = $_POST['messageid'];
 
-$to = $_POST['username'];
-$passwd = $_POST['passwd'];
-$action = $_REQUEST['action'];
-$account = $_REQUEST['account'];
-$messageid = $_GET['messageid'];
+@ $to = $_POST['username'];
+@ $passwd = $_POST['passwd'];
+@ $action = $_REQUEST['action'];
+@ $account = $_REQUEST['account'];
+@ $messageid = $_GET['messageid'];
 
-$to = $_POST['to'];
-$cc = $_POST['cc'];
-$subject = $_POST['subject'];
-$message = $_POST['message'];
+@ $to = $_POST['to'];
+@ $cc = $_POST['cc'];
+@ $subject = $_POST['subject'];
+@ $message = $_POST['message'];
 
 $buttons = array();
 
 $status = '';
 
 if ($username || $passwd) {
-    if(login($username, $passwd)) {
+    if (login($username, $passwd)) {
         $status .=
             "<p style=\"padding-bottom: 100px\">
             You successfully log in in system.</p>";
@@ -44,47 +44,47 @@ if ($action == 'log-out') {
     session_destroy();
     unset($action);
     $_SESSION = array();
-
-    switch ($action) {
-        case 'delete-account':
-            delete_account($_SESSION['auth_user'], $_POST);
-            break;
-        case 'store-settings':
-            store_account_settings($_SESSION['auth_user'], $_POST);
-            break;
-        case 'select-account':
-            if (($account) && (account_exists($_SESSION['auth_user'], $account))) {
-                $_SESSION['selected_account'] = $account;
-            }
-        break;
-    }
-
-    $buttons[0] = 'view-mailbox';
-    $buttons[1] = 'new-message';
-    $buttons[2] = 'account-setup';
-
-    if (check_auth_user()) {
-        $buttons[4] = 'log-out';
-    }
-//2
-   if ($action) {
-       do_html_header($_SESSION['auth_user'],
-           "Warm mail - ".format_action($action),
-           $_SESSION['selected_account']);
-   } else {
-       do_html_header($_SESSION['auth_user'], "Warm mail",
-           $_SESSION['selected_account']);
-   }
-    display_toolbar($buttons);
 }
+
+switch ($action) {
+    case 'delete-account':
+        delete_account($_SESSION['auth_user'], $_POST);
+        break;
+    case 'store-settings':
+        store_account_settings($_SESSION['auth_user'], $_POST);
+        break;
+    case 'select-account':
+        if (($account) && (account_exists($_SESSION['auth_user'], $account))) {
+            $_SESSION['selected_account'] = $account;
+        }
+        break;
+}
+
+$buttons[0] = 'view-mailbox';
+$buttons[1] = 'new-message';
+$buttons[2] = 'account-setup';
+
+if (check_auth_user()) {
+    $buttons[4] = 'log-out';
+}
+//2
+if ($action) {
+    @ do_html_header($_SESSION['auth_user'],
+        "Warm mail - " . format_action($action),
+        $_SESSION['selected_account']);
+} else {
+    @ do_html_header($_SESSION['auth_user'], "Warm mail",
+        $_SESSION['selected_account']);
+}
+display_toolbar($buttons);
 
 //3
 echo $status;
 
 if (!check_auth_user()) {
-    echo "<p>You must log in";
+    echo "You must log in";
     if (($action) && ($action != 'log-out')) {
-        echo " and then go to ".format_action($action);
+        echo " and then go to " . format_action($action);
     }
     echo ".</p>";
     display_login_form($action);
@@ -102,22 +102,22 @@ if (!check_auth_user()) {
                 echo "<p style=\"padding-bottom: 100px\">
                     Cannot send message.</p>";
             }
-        break;
+            break;
         case 'delete':
             delete_message($_SESSION['auth_user'],
                 $_SESSION['selected_account'], $messageid);
         case 'select-account':
         case 'view-mailbox':
             display_list($_SESSION['auth_user'], $_SESSION['selected_account']);
-        break;
+            break;
         case 'show-headers':
         case 'hide-headers':
         case 'view-message':
             $fullheaders = ($action == 'show-headers');
             display_message($_SESSION['auth_user'],
-                            $_SESSION['selected_account'],
-                            $messageid, $fullheaders);
-        break;
+                $_SESSION['selected_account'],
+                $messageid, $fullheaders);
+            break;
         case 'reply-all': {
             if (!$imap) {
                 $imap = open_mailbox($_SESSION['auth_user'],
@@ -138,7 +138,7 @@ if (!check_auth_user()) {
                     $to, $cc, $subject, $body);
             }
         }
-        break;
+            break;
         case 'reply':
             if (!$imap) {
                 $imap = open_mailbox($_SESSION['auth_user'],
@@ -151,30 +151,30 @@ if (!check_auth_user()) {
                     $to = $header->fromaddress;
                 }
 
-                $subject = "Re: ".$header->subject;
+                $subject = "Re: " . $header->subject;
                 $body = add_quoting($stripslashes($imap_body($imap, $messageid)));
                 imap_close($imap);
 
                 display_new_message_form($_SESSION['auth_user'],
                     $to, $cc, $subject, $body);
             }
-        break;
+            break;
 
         case 'forward':
             if (!$imap) {
                 $header = imap_header($imap, $messageid);
                 $body = add_quoting(stripslashes(imap_body($imap, $messageid)));
-                $subject = "Fwd: ".$header->subject;
+                $subject = "Fwd: " . $header->subject;
                 imap_close($imap);
                 display_new_message_from($_SESSION['auth_user'],
                     $to, $cc, $subject, $body);
             }
-        break;
+            break;
 
         case 'new-message':
             display_new_message_form($_SESSION['auth_user'],
                 $to, $cc, $subject, $body);
-        break;
+            break;
     }
 }
 

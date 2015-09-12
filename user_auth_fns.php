@@ -1,7 +1,23 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: carte
- * Date: 05.09.2015
- * Time: 22:26
- */
+
+function check_auth_user() {
+    if (isset($_SESSION['auth_user'])) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+function login($username, $passwd) {
+    $conn = db_connect();
+    $query = "SELECT * FROM users
+              WHERE username='".$username."'
+              and password = '".$passwd."'";
+    $result = $conn->query($query);
+    if (!$result) {
+        return false;
+    } else {
+        return true;
+    }
+}

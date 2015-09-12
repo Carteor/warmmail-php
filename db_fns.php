@@ -1,7 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: carte
- * Date: 05.09.2015
- * Time: 22:26
- */
+
+function db_connect()
+{
+    $result = new mysqli('localhost', 'mail', 'password', 'mail');
+    if (!$result) {
+        echo "Can\'t connect to database";
+    } else {
+        return $result;
+    }
+}
+
+?>

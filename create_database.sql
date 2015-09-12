@@ -1,26 +1,27 @@
-create database mail;
+CREATE DATABASE mail;
 
-use mail;
+USE mail;
 
-create table users
+CREATE TABLE users
 (
-  username char(16) not null primary key,
-  password char(40) not null,
-  address char(100) not null,
-  displayname char(100) not null
+  username    CHAR(16)  NOT NULL PRIMARY KEY,
+  password    CHAR(40)  NOT NULL,
+  address     CHAR(100) NOT NULL,
+  displayname CHAR(100) NOT NULL
 );
 
-create table accounts
+CREATE TABLE accounts
 (
-  username char(16) not null,
-  server char(100) not null,
-  port int not null,
-  type char(4) not null,
-  remoteuser char(50) not null,
-  remotepassword char(50) not null,
-  accountid int unsigned not null auto_increment primary key
+  username       CHAR(16)     NOT NULL,
+  server         CHAR(100)    NOT NULL,
+  port           INT          NOT NULL,
+  type           CHAR(4)      NOT NULL,
+  remoteuser     CHAR(50)     NOT NULL,
+  remotepassword CHAR(50)     NOT NULL,
+  accountid      INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY
 );
 
-grant select, insert, update, delete
-on mail.*
-to mail@localhost identified by 'password';
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON mail.*
+TO mail@localhost
+IDENTIFIED BY 'password';

@@ -1,9 +1,10 @@
 <?php
 
-function get_accounts($auth_user) {
+function get_accounts($auth_user)
+{
     $list = array();
-    if ($conn->db_connect()) {
-        $query = "select * from accounts where username = '".$auth_user."'";
+    if ($conn = db_connect()) {
+        $query = "SELECT * FROM accounts WHERE username = '" . $auth_user . "'";
         $result = $conn->query($query);
         if ($result) {
             while ($settings = $result->fetch_assoc()) {
@@ -16,27 +17,49 @@ function get_accounts($auth_user) {
     return $list;
 }
 
-function store_account_settings($auth_user, $settings) {
+function get_account_list($auth_user)
+{
+    $list = array();
+    if ($conn = db_connect()) {
+        $query = "SELECT remoteuser
+            FROM accounts
+            WHERE username = '" . $auth_user . "'";
+        $result = $conn->query($query);
+        if ($result) {
+            while ($settings = $result->fetch_assoc()) {
+                array_push($list, $settings);
+            }
+        } else {
+            return false;
+        }
+    }
+    return $list;
+}
+
+function store_account_settings($auth_user, $settings)
+{
     if (!filled_out($settings)) {
         echo "<p>All fields must be filled, Try again.</p>";
         return false;
     } else {
         if ($settings['account'] > 0) {
-            $query = "update accounts set server = '".$settings[server]."',
-                port = '".$settings[port]."', type='".$settings[type]."',
-                remoteuser = '".$settings[remoteuser]."',
-                remotepassword = '".$settings[remotepassword]."'
-                where accountid = '".$settings[account]."'
-                and username='".$auth_user."'";
+            $query = "UPDATE accounts SET server = '" . $settings[server] . "',
+                port = '" . $settings[port] . "', type='" . $settings[type] . "',
+                remoteuser = '" . $settings[remoteuser] . "',
+                remotepassword = '" . $settings[remotepassword] . "'
+                WHERE accountid = '" . $settings[account] . "'
+                AND username='" . $auth_user . "'";
         } else {
-            $query = "insert into accounts values ('".$auth_user."',
-            '".$settings[server]."', '".$settings[port]."',
-            '".$settings[type]."', '".$settings[remoteuser]."',
-            '".$settings[remotepassword]."', NULL)";
+            $query = "INSERT INTO accounts VALUES (
+                '" . $auth_user . "',
+                '" . $settings[server] . "', '" . $settings[port] . "',
+                '" . $settings[type] . "', '" . $settings[remoteuser] . "',
+                '" . $settings[remotepassword] . "',
+                NULL)";
         }
-        if ($conn->db_connect()) {
+        if ($conn = db_connect()) {
             $result = $conn->query($query);
-            if ($query) {
+            if ($result) {
                 return true;
             } else {
                 return false;
@@ -48,19 +71,25 @@ function store_account_settings($auth_user, $settings) {
     }
 }
 
-function delete_account($auth_user, $accountid) {
-    $query = "delete from accounts where accountid = '".$accountid."'
-        and username='".$auth_user."'";
-    if (db_connect()) {
+function delete_account($auth_user, $accountid)
+{
+    $query = "DELETE FROM accounts
+        WHERE accountid = '" . $accountid . "'
+        AND username='" . $auth_user . "'";
+    if ($conn = db_connect()) {
         $result = $conn->query($query);
+        return $result;
+    } else {
+        return false;
     }
-    return $result;
 }
 
-function number_of_accounts($auth_user) {
-    $query = "select count(*) from accounts where
-      username = '".$auth_user."'";
-    if (db_connect()) {
+function number_of_accounts($auth_user)
+{
+    $query = "SELECT count(*)
+              FROM accounts WHERE
+              username = '" . $auth_user . "'";
+    if ($conn = db_connect()) {
         $result = $conn->query($query);
         if ($result) {
             $row = $result->fetch_array();
@@ -70,7 +99,8 @@ function number_of_accounts($auth_user) {
     return 0;
 }
 
-function open_mailbox($auth_user, $accountid){
+function open_mailbox($auth_user, $accountid)
+{
     if (number_of_accounts($auth_user) == 1) {
         $accounts = get_account_list($auth_user);
         $_SESSION['selected_account'] = $accounts[0];
@@ -81,11 +111,11 @@ function open_mailbox($auth_user, $accountid){
     if (!sizeof($settings)) {
         return 0;
     }
-    $mailbox = '{'.$settings[server];
+    $mailbox = '{' . $settings[server];
     if ($settings[type] == 'POP3') {
         $mailbox .= '/pop3';
     }
-    $mailbox .= ':'.$settings[port].'}INBOX';
+    $mailbox .= ':' . $settings[port] . '}INBOX';
     @$imap = imap_open($mailbox, $settings['remoteuser'], $settings['remotepassword']);
     return $imap;
 }
@@ -125,7 +155,8 @@ function retrieve_message($auth_user, $accountid, $messageid, $fullheaders)
     return $message;
 }
 
-function delete_message($auth_user, $accountid, $messageid) {
+function delete_message($auth_user, $accountid, $messageid)
+{
     $imap = open_mailbox($auth_user, $accountid);
     if ($imap) {
         imap_delete($imap, $messageid);
@@ -136,13 +167,14 @@ function delete_message($auth_user, $accountid, $messageid) {
     return false;
 }
 
-function send_message($to, $cc, $subject, $message) {
-    if (!$conn->db_connect()) {
+function send_message($to, $cc, $subject, $message)
+{
+    if (!$conn = db_connect()) {
         return false;
     }
 
-    $query = "select address from users where
-              username='".$_SESSION['auth_user']."'";
+    $query = "SELECT address FROM users WHERE
+              username='" . $_SESSION['auth_user'] . "'";
 
     $result = $conn->query($query);
     if (!$result) {
@@ -151,7 +183,7 @@ function send_message($to, $cc, $subject, $message) {
         return false;
     } else {
         $row = $result->fetch_object();
-        $other = 'From: '.$row->address;
+        $other = 'From: ' . $row->address;
         if (!empty($cc)) {
             $other .= "\r\nCc: $cc";
         }
