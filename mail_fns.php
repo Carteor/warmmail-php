@@ -19,21 +19,18 @@ function get_accounts($auth_user)
 
 function get_account_list($auth_user)
 {
-    $list = array();
+//    echo "Debug: get_account_list()<br />";
+    $query = "SELECT remoteuser
+              FROM accounts WHERE
+              username = '" . $auth_user . "'";
     if ($conn = db_connect()) {
-        $query = "SELECT remoteuser
-            FROM accounts
-            WHERE username = '" . $auth_user . "'";
         $result = $conn->query($query);
         if ($result) {
-            while ($settings = $result->fetch_assoc()) {
-                array_push($list, $settings);
-            }
-        } else {
-            return false;
+            $row = $result->fetch_array();
+            return $row;
         }
     }
-    return $list;
+    return 0;
 }
 
 function store_account_settings($auth_user, $settings)
@@ -73,14 +70,23 @@ function store_account_settings($auth_user, $settings)
 }
 
 function get_account_settings($auth_user, $accountid) {
+//    echo "Debug: get_account_settings()<br />";
+//    echo "Debug: accountid: ".$accountid."<br />";
     $conn = db_connect();
     $query = "SELECT * FROM accounts
-                WHERE accountid = '".$accountid."'
+                WHERE remoteuser = '".$accountid."'
                 AND username = '".$auth_user."'";
+//    echo "Debug: query: ".$query."<br />";
     $result = $conn->query($query);
+//    echo "Debug: num_rows: ",$result->num_rows."<br />";
+//    echo "Debug: getType(result): ".gettype($result)."<br />";
+//    echo "Debug: item: ";
+    $item = $result->fetch_array();
+//    echo "Debug: getType(item): ".gettype($item)."<br />";
+//    echo $item['type']."<br />";
+
     if ($result) {
-        $result->fetch_array();
-        return $result;
+        return $item;
     }
     return false;
 }
@@ -115,6 +121,7 @@ function number_of_accounts($auth_user)
 
 function open_mailbox($auth_user, $accountid)
 {
+//    echo "Debug: open_mailbox()<br />";
     if (number_of_accounts($auth_user) == 1) {
         $accounts = get_account_list($auth_user);
         $_SESSION['selected_account'] = $accounts[0];
@@ -122,6 +129,7 @@ function open_mailbox($auth_user, $accountid)
     }
 
     $settings = get_account_settings($auth_user, $accountid);
+//    echo "Debug: settings[server]: ".$settings['server']."<br />";
     if (!sizeof($settings)) {
         return 0;
     }
@@ -129,8 +137,10 @@ function open_mailbox($auth_user, $accountid)
     if ($settings['type'] == 'POP3') {
         $mailbox .= '/pop3';
     }
-    $mailbox .= ':' . $settings['port'] . '}INBOX';
+    $mailbox .= ':' . $settings['port'] . '/ssl}INBOX';
+//    echo "mailbox: ".$mailbox."<br />";
     $imap = imap_open($mailbox, $settings['remoteuser'], $settings['remotepassword']);
+
     return $imap;
 }
 

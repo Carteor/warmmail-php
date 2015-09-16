@@ -23,16 +23,22 @@ session_start();
 $buttons = array();
 
 $status = '';
-
 if ($username || $passwd) {
     if (login($username, $passwd)) {
+
         $status .=
             "<p style=\"padding-bottom: 100px\">
             You successfully log in in system.</p>";
         $_SESSION['auth_user'] = $username;
+//        echo "Debug: number_of_accounts_SESSION[auth_user]): ".number_of_accounts($_SESSION['auth_user'])."<br />";
         if (number_of_accounts($_SESSION['auth_user']) == 1) {
+//            echo "Debug: if (number_of_accounts(_SESSION[auth_user]) == 1)<br />";
             $accounts = get_account_list($_SESSION['auth_user']);
+//            echo "Debug: after get_account_list(): ".$accounts[0]."<br />";
+
             $_SESSION['selected_account'] = $accounts[0];
+//            echo "Debug: session: ".$_SESSION['selected_account']."<br />".
+//                "accounts[0]: ".$accounts[0]."<br />";
         }
     } else {
         $status .= "<p style=\"padding-bottom: 100px\">
@@ -152,7 +158,7 @@ if (!check_auth_user()) {
                 }
 
                 $subject = "Re: " . $header->subject;
-                $body = add_quoting(stripslashes($imap_body($imap, $messageid)));
+                $body = add_quoting(stripslashes(imap_body($imap, $messageid)));
                 imap_close($imap);
 
                 display_new_message_form($_SESSION['auth_user'],
@@ -161,17 +167,20 @@ if (!check_auth_user()) {
             break;
 
         case 'forward':
+//            echo "Debug: forward: <br />";
             if (!$imap) {
                 $header = imap_header($imap, $messageid);
-                $body = add_quoting(stripslashes(imap_body($imap, $messageid)));
+                $body = stripslashes(imap_body($imap, $messageid));
+//                echo "Debug: body: ".$body."<br />";
                 $subject = "Fwd: " . $header->subject;
                 imap_close($imap);
-                display_new_message_from($_SESSION['auth_user'],
+                display_new_message_form($_SESSION['auth_user'],
                     $to, $cc, $subject, $body);
             }
             break;
 
         case 'new-message':
+            $body ='';
             display_new_message_form($_SESSION['auth_user'],
                 $to, $cc, $subject, $body);
             break;

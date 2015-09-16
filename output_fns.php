@@ -94,15 +94,21 @@ function display_account_select($auth_user, $selected_account)
     echo "display_account_select()<br />";
     ?>
     <select>
+        <option value="lol" name="lol">
 
+        </option>
     </select>
     <?php
 }
 
 function display_list($auth_user, $accountid)
 {
+//    echo "Debug: display_list()<br />";
     global $table_width;
-    echo $accountid;
+    //debug $accountid -> $accountid[0]
+    $counter = 0;
+
+//    echo "Debug: counter: ".$counter."<br />";
     if (!$accountid) {
         echo "<p style=\"padding-bottom: 100px\">Mailbox is not selected.</p>";
     } else {
